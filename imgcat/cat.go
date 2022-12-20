@@ -4,9 +4,23 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"log"
 	"strings"
 )
 
+func NewWriter(w io.Writer, done chan struct{}) io.WriteCloser {
+	pr, pw := io.Pipe()
+	go func() {
+		err := Copy(w, pr)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		done <- struct{}{}
+	}()
+	return pw
+}
+
+// reads content from reader -> writes(header + base64[content] + footer)
 func Copy(w io.Writer, r io.Reader) error {
 
 	header := strings.NewReader("\033]1337;File=inline=1:")

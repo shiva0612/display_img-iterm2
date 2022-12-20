@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"shiva/imgcat"
@@ -27,6 +28,17 @@ func cat(path string) error {
 	}
 	defer f.Close()
 
-	return imgcat.Copy(os.Stdout, f)
+	done := make(chan struct{})
+	wc := imgcat.NewWriter(os.Stdout, done)
+	_, err = io.Copy(wc, f)
+	if err != nil {
+		return err
+	}
+	err = wc.Close()
+	if err != nil {
+		return err
+	}
+	<-done
+	return err
 
 }
