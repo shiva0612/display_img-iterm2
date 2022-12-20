@@ -1,12 +1,11 @@
 package main
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"os"
+	"shiva/imgcat"
 )
 
 func main() {
@@ -28,19 +27,6 @@ func cat(path string) error {
 	}
 	defer f.Close()
 
-	fmt.Printf("\033]1337;File=inline=1:")
+	return imgcat.Copy(os.Stdout, f)
 
-	wc := base64.NewEncoder(base64.StdEncoding, os.Stdout)
-	_, err = io.Copy(wc, f)
-	if err != nil {
-		return errors.New("could not bas64 encode: " + err.Error())
-	}
-	err = wc.Close()
-	if err != nil {
-		return errors.New("could not close the writeCloser" + err.Error())
-	}
-
-	fmt.Printf("\a")
-
-	return nil
 }
