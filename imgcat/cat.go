@@ -8,16 +8,34 @@ import (
 	"strings"
 )
 
-func NewWriter(w io.Writer, done chan struct{}) io.WriteCloser {
+type writer struct {
+	pw   *io.PipeWriter
+	done chan struct{}
+}
+
+func (w *writer) Write(data []byte) (int, error) {
+	return w.pw.Write(data)
+
+}
+
+func (w *writer) Close() error {
+	if err := w.pw.Close(); err != nil {
+		return err
+	}
+	<-w.done
+	return nil
+}
+func NewWriter(w io.Writer) *writer {
 	pr, pw := io.Pipe()
+	custW := &writer{pw: pw, done: make(chan struct{})}
 	go func() {
 		err := Copy(w, pr)
 		if err != nil {
 			log.Println(err.Error())
 		}
-		done <- struct{}{}
+		custW.done <- struct{}{}
 	}()
-	return pw
+	return custW
 }
 
 // reads content from reader -> writes(header + base64[content] + footer)

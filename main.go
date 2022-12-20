@@ -28,8 +28,7 @@ func cat(path string) error {
 	}
 	defer f.Close()
 
-	done := make(chan struct{})
-	wc := imgcat.NewWriter(os.Stdout, done)
+	wc := imgcat.NewWriter(os.Stdout)
 	_, err = io.Copy(wc, f)
 	if err != nil {
 		return err
@@ -38,7 +37,6 @@ func cat(path string) error {
 	if err != nil {
 		return err
 	}
-	<-done
-	return err
+	return nil
 
 }
