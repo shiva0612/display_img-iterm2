@@ -11,7 +11,7 @@ import (
 func NewWriter(w io.Writer, done chan struct{}) io.WriteCloser {
 	pr, pw := io.Pipe()
 	go func() {
-		err := Copy(w, pr)
+		err := Copy(w, pr) //copying raw imgContent from pr -> os.Stdout (header+base64(body)+footer)
 		if err != nil {
 			log.Println(err.Error())
 		}

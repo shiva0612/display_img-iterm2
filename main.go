@@ -34,7 +34,7 @@ func cat(path string) error {
 	if err != nil {
 		return err
 	}
-	err = wc.Close()
+	err = wc.Close() //flush the imgContent -> pr
 	if err != nil {
 		return err
 	}
